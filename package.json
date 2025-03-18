@@ -1,0 +1,17 @@
+{
+  "name": "newsletter-signup-website",
+  "version": "1.0.0",
+  "description": "This is a Signup Website.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@mailchimp/mailchimp_marketing": "^3.0.80",
+    "body-parser": "^1.20.3",
+    "express": "^4.21.2"
+  }
+}
