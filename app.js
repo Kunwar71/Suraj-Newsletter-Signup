@@ -19,10 +19,10 @@ client.setConfig({
   server: MAILCHIMP_SERVER_PREFIX,
 });
 
-// Debugging: Log environment variables
-console.log("MAILCHIMP_LIST_ID:", MAILCHIMP_LIST_ID);
-console.log("MAILCHIMP_API_KEY:", MAILCHIMP_API_KEY);
-console.log("MAILCHIMP_SERVER_PREFIX:", MAILCHIMP_SERVER_PREFIX);
+// // Debugging: Log environment variables
+// console.log("MAILCHIMP_LIST_ID:", MAILCHIMP_LIST_ID);
+// console.log("MAILCHIMP_API_KEY:", MAILCHIMP_API_KEY);
+// console.log("MAILCHIMP_SERVER_PREFIX:", MAILCHIMP_SERVER_PREFIX);
 // console.log("Environment Variables:", process.env);
 
 app.get("/", function (req, res) {
