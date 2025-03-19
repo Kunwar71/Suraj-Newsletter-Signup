@@ -1,24 +1,35 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
-const https = require("https");
-// const request = require("request");
 const client = require("@mailchimp/mailchimp_marketing");
-const port = 3000;
+
+const MAILCHIMP_LIST_ID = process.env.MAILCHIMP_LIST_ID;
+const MAILCHIMP_API_KEY = process.env.MAILCHIMP_API_KEY;
+const MAILCHIMP_SERVER_PREFIX = process.env.MAILCHIMP_SERVER_PREFIX;
+
+const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+
+// Configure Mailchimp client
 client.setConfig({
-  apiKey: process.env.MAILCHIMP_API_KEY,
-  server: process.env.MAILCHIMP_SERVER_PREFIX,
+  apiKey: MAILCHIMP_API_KEY,
+  server: MAILCHIMP_SERVER_PREFIX,
 });
+
+// Debugging: Log environment variables
+console.log("MAILCHIMP_LIST_ID:", MAILCHIMP_LIST_ID);
+console.log("MAILCHIMP_API_KEY:", MAILCHIMP_API_KEY);
+console.log("MAILCHIMP_SERVER_PREFIX:", MAILCHIMP_SERVER_PREFIX);
+// console.log("Environment Variables:", process.env);
 
 app.get("/", function (req, res) {
   res.sendFile(__dirname + "/index.html");
 });
 
 app.post("/", async function (req, res) {
-  // extracts fName, lName and email fron the request body
   const { fName, lName, email } = req.body;
 
   // Validate required fields
@@ -27,27 +38,18 @@ app.post("/", async function (req, res) {
   }
 
   try {
-    // Add member to Mailchimp list
-    const response = await client.lists.batchListMembers(
-      process.env.MAILCHIMP_LIST_ID,
-      {
-        members: [
-          {
-            email_address: email,
-            status: "subscribed",
-            merge_fields: {
-              FNAME: fName,
-              LNAME: lName,
-            },
-          },
-        ],
-      }
-    );
+    const response = await client.lists.addListMember(MAILCHIMP_LIST_ID, {
+      email_address: email,
+      status: "subscribed",
+      merge_fields: {
+        FNAME: fName,
+        LNAME: lName,
+      },
+    });
 
     console.log("Mailchimp API Response:", response);
 
-    // Check if the API call was successful
-    if (response.new_members && response.new_members.length > 0) {
+    if (response.id) {
       console.log("Success: Member added successfully!");
       res.sendFile(__dirname + "/success.html");
     } else {
@@ -55,50 +57,15 @@ app.post("/", async function (req, res) {
       res.sendFile(__dirname + "/failure.html");
     }
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Mailchimp Error:", error.response?.body || error.message);
     res.sendFile(__dirname + "/failure.html");
   }
 });
+
 app.post("/failure", function (req, res) {
   res.redirect("/");
 });
-// app.post("/", function (req, res) {
-//   const fName = req.body.fName;
-//   const lName = req.body.lName;
-//   const email = req.body.email;
-
-//   const data = {
-//     members: [
-//       {
-//         email_address: email,
-//         status: "subscribed",
-//         merge_fields: {
-//           FNAME: fName,
-//           LNAME: lName,
-//         },
-//       },
-//     ],
-//   };
-//   const jsonData = JSON.stringify(data);
-
-//   const url = "https://us16.api.mailchimp.com/3.0/lists/1eb70b975c";
-//   const options = {
-//     method: "POST",
-//     auth: "suraj:453888ebbc43dc1f672f4754745402df-us16",
-//   };
-
-//   const request = https.request(url, options, function (response) {
-//     response.on("data", function (data) {
-//       console.log(JSON.parse(data));
-//     });
-//   });
-//   request.write(jsonData);
-//   request.end();
-// });
 
 app.listen(port, function () {
-  console.log("Server is running on port: 3000");
+  console.log(`Server is running on port: ${port}`);
 });
-
-// list id - 1eb70b975c
-// api key = 453888ebbc43dc1f672f4754745402df-us16
