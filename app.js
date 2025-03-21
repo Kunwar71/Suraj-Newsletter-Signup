@@ -34,7 +34,7 @@ app.post("/", async function (req, res) {
 
   // Validate required fields
   if (!fName || !lName || !email) {
-    return res.status(400).send("Missing required fields");
+    res.sendFile(__dirname + "/failure.html");
   }
 
   try {
